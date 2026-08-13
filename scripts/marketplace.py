@@ -220,6 +220,27 @@ def validate_attestation(package: Path, repository: str) -> None:
     )
 
 
+def resolve_tag_commit(repository: str, tag_name: str) -> str:
+    tag = github_json(f"/repos/{repository}/git/ref/tags/{tag_name}")
+    if not isinstance(tag, dict):
+        return ""
+    obj = tag.get("object")
+    for _ in range(8):
+        if not isinstance(obj, dict):
+            return ""
+        object_type = obj.get("type")
+        sha = obj.get("sha")
+        if not isinstance(sha, str):
+            return ""
+        if object_type == "commit":
+            return sha
+        if object_type != "tag":
+            return ""
+        tag_object = github_json(f"/repos/{repository}/git/tags/{sha}")
+        obj = tag_object.get("object") if isinstance(tag_object, dict) else None
+    raise ValueError(f"{repository}: tag nesting exceeds the supported limit")
+
+
 def validate_release(registration: Registration, verify_attestation: bool = True) -> ValidatedRelease:
     validate_repository(registration)
     release = github_json(f"/repos/{registration.repository}/releases/latest")
@@ -248,12 +269,7 @@ def validate_release(registration: Registration, verify_attestation: bool = True
     tag_name = release.get("tag_name")
     if not isinstance(tag_name, str):
         raise ValueError(f"{registration.id}: release tag is missing")
-    tag = github_json(f"/repos/{registration.repository}/git/ref/tags/{tag_name}")
-    source_commit = ""
-    if isinstance(tag, dict):
-        obj = tag.get("object")
-        if isinstance(obj, dict) and isinstance(obj.get("sha"), str):
-            source_commit = obj["sha"]
+    source_commit = resolve_tag_commit(registration.repository, tag_name)
     if not source_commit and isinstance(target_commit, str):
         commit = github_json(f"/repos/{registration.repository}/commits/{target_commit}")
         if isinstance(commit, dict) and isinstance(commit.get("sha"), str):

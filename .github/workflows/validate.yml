@@ -1,0 +1,41 @@
+name: Validate plugin submission
+
+on:
+  pull_request:
+    paths:
+      - "plugins/**"
+      - "scripts/**"
+      - ".github/**"
+      - "revocations.toml"
+
+permissions:
+  contents: read
+  attestations: read
+  pull-requests: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out trusted validator
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          path: validator
+      - name: Check out submitted registration
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: submission
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13"
+      - name: Enforce registration-only pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python validator/scripts/validate_pr.py
+      - name: Validate registry and release provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python validator/scripts/validate_registry.py --root submission

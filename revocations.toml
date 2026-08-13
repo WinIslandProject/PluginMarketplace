@@ -1,0 +1,7 @@
+schema = 1
+
+# Maintainers may add entries without removing a plugin registration.
+# [[revocations]]
+# id = "example-plugin"
+# version = "1.0.0"
+# reason = "Security issue"

@@ -45,7 +45,7 @@ def revocations(path: Path) -> list[dict[str, str]]:
 def icon_asset(plugin_id: str, source_name: str, data: bytes) -> str:
     suffix = Path(source_name).suffix.lower()
     digest = hashlib.sha256(data).hexdigest()
-    return f"icons/{plugin_id}-{digest[:20]}{suffix}"
+    return f"icon-{plugin_id}-{digest[:20]}{suffix}"
 
 
 def main() -> None:

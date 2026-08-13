@@ -68,12 +68,14 @@ def main() -> None:
         print(f"Publishing {registration.id}")
         release = validate_release(registration)
         icon_url = None
+        icon_sha256 = None
         if release.icon is not None and release.icon_name is not None:
             asset_name = icon_asset(registration.id, release.icon_name, release.icon)
             destination = args.output / asset_name
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes(release.icon)
             icon_url = f"{DOWNLOAD_ROOT}/{asset_name}"
+            icon_sha256 = hashlib.sha256(release.icon).hexdigest()
         plugins.append(
             {
                 "id": registration.id,
@@ -92,6 +94,7 @@ def main() -> None:
                 "categories": list(registration.categories),
                 "readme": release.readme,
                 "icon_url": icon_url,
+                "icon_sha256": icon_sha256,
             }
         )
     catalog = {

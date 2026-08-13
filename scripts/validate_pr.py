@@ -12,18 +12,26 @@ def main() -> None:
     pull = event.get("pull_request")
     if not isinstance(pull, dict):
         raise ValueError("pull request event is required")
-    files_url = pull.get("url", "") + "/files?per_page=100"
-    request = urllib.request.Request(
-        files_url,
-        headers={
-            "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
-            "User-Agent": "WinIsland-PluginMarketplace",
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        files = json.load(response)
+    files = []
+    page = 1
+    while True:
+        request = urllib.request.Request(
+            pull.get("url", "") + f"/files?per_page=100&page={page}",
+            headers={
+                "Accept": "application/vnd.github+json",
+                "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                "User-Agent": "WinIsland-PluginMarketplace",
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
+        )
+        with urllib.request.urlopen(request, timeout=30) as response:
+            batch = json.load(response)
+        if not isinstance(batch, list):
+            raise ValueError("GitHub returned an invalid pull request file list")
+        files.extend(batch)
+        if len(batch) < 100:
+            break
+        page += 1
     registrations = []
     for changed in files:
         name = changed.get("filename", "")

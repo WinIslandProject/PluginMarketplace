@@ -1,0 +1,6 @@
+schema = 1
+id = "airpods-battery-watch"
+repository = "C130AIR/airpods-battery-watch"
+asset = "*.winisland-plugin.zip"
+categories = ["utility"]
+min_winisland_version = "1.2.9"

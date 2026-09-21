@@ -1,0 +1,6 @@
+schema = 1
+id = "winisland-timers"
+repository = "azkbzxf/winisland-timers"
+asset = "*.winisland-plugin.zip"
+categories = ["widget", "utility"]
+min_winisland_version = "1.3.5"

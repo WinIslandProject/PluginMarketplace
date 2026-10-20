@@ -1,0 +1,6 @@
+schema = 1
+id = "winisland-todo"
+repository = "FoOcean/winisland-todo"
+asset = "*.winisland-plugin.zip"
+categories = ["widget", "utility"]
+min_winisland_version = "1.4.0"
